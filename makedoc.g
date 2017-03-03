@@ -1,5 +1,5 @@
 #
-# GromovMachine: The Gromov-Machine: Hyperbolic Groups in GAP
+# GreenMachine: Hyperbolic Groups in GAP
 #
 # This file is a script which compiles the package manual.
 #

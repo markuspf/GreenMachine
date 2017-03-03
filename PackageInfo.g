@@ -1,5 +1,5 @@
 #
-# GromovMachine: The Gromov-Machine: Hyperbolic Groups in GAP
+# GreenMachine: Hyperbolic Groups in GAP
 #
 # This file contains package meta data. For additional information on
 # the meaning and correct usage of these fields, please consult the
@@ -8,8 +8,8 @@
 #
 SetPackageInfo( rec(
 
-PackageName := "GromovMachine",
-Subtitle := "The Gromov-Machine: Hyperbolic Groups in GAP",
+PackageName := "GreenMachine",
+Subtitle := "Hyperbolic Groups in GAP",
 Version := "0.1",
 Date := "01/12/2016", # dd/mm/yyyy format
 
@@ -38,7 +38,7 @@ SourceRepository := rec(
 ),
 IssueTrackerURL := Concatenation( ~.SourceRepository.URL, "/issues" ),
 #SupportEmail   := "TODO",
-PackageWWWHome  := "https://markuspf.github.io/GromovMachine/",
+PackageWWWHome  := "https://markuspf.github.io/GreenMachine/",
 PackageInfoURL  := Concatenation( ~.PackageWWWHome, "PackageInfo.g" ),
 README_URL      := Concatenation( ~.PackageWWWHome, "README.md" ),
 ArchiveURL      := Concatenation( ~.SourceRepository.URL,
@@ -60,12 +60,12 @@ Status := "dev",
 AbstractHTML   :=  "",
 
 PackageDoc := rec(
-  BookName  := "GromovMachine",
+  BookName  := "GreenMachine",
   ArchiveURLSubset := ["doc"],
   HTMLStart := "doc/chap0.html",
   PDFFile   := "doc/manual.pdf",
   SixFile   := "doc/manual.six",
-  LongTitle := "The Gromov-Machine: Hyperbolic Groups in GAP",
+  LongTitle := "The Green-Machine: Hyperbolic Groups in GAP",
 ),
 
 Dependencies := rec(

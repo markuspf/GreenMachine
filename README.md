@@ -1,3 +1,3 @@
-The GAP 4 package `GromovMachine'
-==============================
+# GreenMachine: Hyperbolic Groups in GAP
+
 
