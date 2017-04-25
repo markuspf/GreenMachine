@@ -3,3 +3,5 @@
 #
 
 ReadPackage( "GreenMachine", "gap/GreenMachine.gd");
+ReadPackage( "GreenMachine", "gap/Equations.gd");
+
