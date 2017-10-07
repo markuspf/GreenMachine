@@ -1,5 +1,15 @@
 # Solving equations over Free Groups
 
+InstallGlobalFunction(FreeGroupEquationSolve,
+function(w,u)
+    local vars, consts;
+
+    vars := GeneratorsOfGroup(FreeGroupOfWord(w));
+    consts := GeneratorsOfGroup(FreeGroupOfWord(u));
+
+end);
+
+
 #	ex and ey are the x- and y-exponent sums of the word w respectively.
 #	q is the quotient of the exponent sums, e.g. if exponent sums are 3 and 7 then q=2, as 2x3+1=7
 #	aut:=[x', y'] is a list consisting of the Neilsen generating pair corresponding to the Moldovanskii rewriting.
@@ -47,11 +57,6 @@ end);
 #    (If w_0 in <y^-1xy, x> then reinterpret x->x_0, y->x_0y_0
 
 # Solves the equation w(x,y) = u(a,b) where w in F(x,y) :wq
-
-FreeGroupEquationSolve := function(w,u)
-    
-end;
-
 # There is no real reason to not use
 # list and not just 2 variables
 InstallGlobalFunction(IsSolution,
@@ -60,24 +65,36 @@ function(w, u, xs, ixs)
 end);
 
 # Find solutions to an equation w(x,y) = u(a,b)
-# by brute force
+# up to length n by brute force
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local res, i, words, totry;
+    local res, i, k, words, totry, consts, vars;
+
+    # TODO: Make sure this gives is the correct generators all
+    #       the time
+    consts := Concatenation(List(GeneratorsOfMonoid(FreeGroupOfWord(u)), LetterRepAssocWord));
+    vars := GeneratorsOfGroup(FreeGroupOfWord(w));
+    if Length(vars) <> 2 then
+        Error("Can only handle precisely two variables currently");
+    fi;
 
     res := [];
 
     words := [];
-    totry := [ShallowCopy(gens)];
+    totry := [ShallowCopy(consts)];
 
     i := 1;
     while i > 0 do
         while (0 < i) and (i < n) do
             if not IsEmpty(totry[i]) then
                 words[i] := Remove(totry[i]);
-                Add(res, words{[1..i]});
-                totry[i+1] := ShallowCopy(gens);
+                for k in [1..i] do
+                    if IsSolution(w, u, vars, [ Product(words{[1..k]}), Product(words{[k+1..i]})]) then
+                        Add(res, [words{[1..k]}, words{[k+1..i]}]);
+                    fi;
+                od;
+                totry[i+1] := ShallowCopy(consts);
                 i := i + 1;
             fi;
         od;
@@ -89,61 +106,21 @@ function(w, u, n)
     return res;
 end);
 
+InstallMethod(FreeGroupOfWord, "for a word over the free group",
+              [IsWord], w -> FamilyObj(w)!.freeGroup);
 
+GreenTest := function(n)
+    local w, u, F, U, x, y, a, b;
 
-IterateWordsUpto := function(gens, n)
-    
-    local res, i, words, totry;
+    F := FreeGroup("x", "y");
+    x := F.1; y := F.2;
 
-    res := [];
+    U := FreeGroup("a", "b");
+    a := U.1; b := U.2;
 
-    words := [];
-    totry := [ShallowCopy(gens)];
+    w := x * y * x;
+    u := a^2 * b^2 * a^2;
 
-    i := 1;
-    while i > 0 do
-        while (0 < i) and (i < n) do
-            if not IsEmpty(totry[i]) then
-                words[i] := Remove(totry[i]);
-                Add(res, words{[1..i]});
-                totry[i+1] := ShallowCopy(gens);
-                i := i + 1;
-            fi;
-        od;
-        totry[i] := [];
-        while (i > 0) and IsEmpty(totry[i]) do
-            i := i - 1;
-        od;
-    od;
-    return res;
+    return ShortSolutions(w, u, n);
 end;
-
-
-InstallGlobalFunction(ShortSolutions,
-function(w, u, x, y, n)
-    local res, i, j, k, x0, y0, words, totry;
-
-    res := [];
-    words := [One(w)];
-    totry := [[x,y]];
-
-    i := 1;
-    while i > 0 do
-        while (0 < i) and (i < n) do
-            if not IsEmpty(totry[i]) then
-                words[i+1] := words[i] * Remove(totry[i]);
-                i := i + 1;
-            fi;
-        od;
-        Print("trying word ", words[i]);
-
-        for k in [1..i] do
-            if IsSolution(w, u, x, words[i]{[1..k]}, words{[k+1..i]}) then
-                Add(res, [words[i], k]);
-            fi;
-        od;
-        i := i - 1;
-    od;
-    return res;
-end);
 
