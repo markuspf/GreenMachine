@@ -22,6 +22,12 @@ end);
 #	for our purposes? As might not use syllable notation! (Section 36.3-1 of GAP
 #	documentation.)
 
+# TODO: Tests: Some words to rewrite + test that applying the auotmorphism
+#              stabilises them.
+#       Check whether w is a commutator, and error if it is
+#       Error("w is a commutator");
+#       Error("");
+
 InstallGlobalFunction(MoldovanskiiRewritingByGenerators,
 function(w,x,y)
 	  local ex, ey, q, aut;
@@ -39,7 +45,7 @@ function(w,x,y)
 			      ey := ExponentSumWord(w, y);
 		    elif AbsInt(ex)>AbsInt(ey) then
 			      q := -QuoInt(ex, ey);
-			      w := MappedWord(w, y, y*x^q );
+			      w := MappedWord(w, [y], [y*x^q] );
 			      aut[1] := MappedWord(aut[1], [y], [y*x^q] );
 			      aut[2] := MappedWord(aut[2], [y], [y*x^q] );
 			      ex := ExponentSumWord(w, x);
