@@ -11,6 +11,7 @@
 #! Returns the rewritten word and the automorphism
 DeclareGlobalFunction("MoldovanskiiRewritingByGenerators");
 
+
 DeclareOperation("FreeGroupOfWord", [IsWord]);
 
 

@@ -1,0 +1,3 @@
+
+DeclareGlobalFunction("IsCommutator");
+
