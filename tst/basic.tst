@@ -14,3 +14,8 @@ gap> IsCommutator(F, w);
 false
 
 #
+
+#
+gap> x := F.1 * F.2 * F.1^-1 * F.2^-1;;
+gap> IsCommutator(F, x);
+true
