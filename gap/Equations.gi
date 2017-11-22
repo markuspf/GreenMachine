@@ -75,41 +75,24 @@ end);
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local res, i, k, words, totry, consts, vars;
+    local f, gens, const, consts, vars;
 
     # TODO: Make sure this gives is the correct generators all
     #       the time
-    consts := Concatenation(List(GeneratorsOfMonoid(FreeGroupOfWord(u)), LetterRepAssocWord));
+    consts := GeneratorsOfMonoid(FreeGroupOfWord(u));
     vars := GeneratorsOfGroup(FreeGroupOfWord(w));
-    if Length(vars) <> 2 then
+	gens := GeneratorsOfGroup(FreeGroupOfWord(u));
+    
+	if Length(vars) <> 2 then
         Error("Can only handle precisely two variables currently");
     fi;
 
-    res := [];
+	f := FreeGroup(Concatenation(String(gens[1]), String(gens(2)), 
+								 String(vars[1]), String(vars(2)));
 
-    words := [];
-    totry := [ShallowCopy(consts)];
+	for const in consts do
+		copy := MappedWord(u, [vars[1]], [const])
 
-    i := 1;
-    while i > 0 do
-        while (0 < i) and (i < n) do
-            if not IsEmpty(totry[i]) then
-                words[i] := Remove(totry[i]);
-                for k in [1..i] do
-                    if IsSolution(w, u, vars, [ Product(words{[1..k]}), Product(words{[k+1..i]})]) then
-                        Add(res, [words{[1..k]}, words{[k+1..i]}]);
-                    fi;
-                od;
-                totry[i+1] := ShallowCopy(consts);
-                i := i + 1;
-            fi;
-        od;
-        totry[i] := [];
-        while (i > 0) and IsEmpty(totry[i]) do
-            i := i - 1;
-        od;
-    od;
-    return res;
 end);
 
 InstallMethod(FreeGroupOfWord, "for a word over the free group",
