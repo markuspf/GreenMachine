@@ -72,14 +72,18 @@ end);
 
 # Find solutions to an equation w(x,y) = u(a,b)
 # up to length n by brute force
+# w(x, y) is a function of variables
+# u(a, b) is a function of constants
+# Trying to solve for x and y
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local f, gens, const, consts, vars;
+    local f, gens, const, consts, vars, copy, solutions;
+
+	solutions := [];
 
     # TODO: Make sure this gives is the correct generators all
     #       the time
-    consts := GeneratorsOfMonoid(FreeGroupOfWord(u));
     vars := GeneratorsOfGroup(FreeGroupOfWord(w));
 	gens := GeneratorsOfGroup(FreeGroupOfWord(u));
     
@@ -87,12 +91,19 @@ function(w, u, n)
         Error("Can only handle precisely two variables currently");
     fi;
 
-	f := FreeGroup(Concatenation(String(gens[1]), String(gens(2)), 
-								 String(vars[1]), String(vars(2)));
+	f := FreeGroup(String(gens[1]), String(gens[2]), 
+				   String(vars[1]), String(vars[2]));
+	consts := [f.1, f.1^-1, f.2, f.2^-1];
+	w := MappedWord(w, vars, [f.3, f.4]);
+	u := MappedWord(u, gens, [f.1, f.2]);
 
 	for const in consts do
-		copy := MappedWord(u, [vars[1]], [const])
-
+		copy := MappedWord(w, [f.3], [const]);
+		if copy = u then
+			Add(solutions, const);
+		fi;
+	od;
+	return solutions;
 end);
 
 InstallMethod(FreeGroupOfWord, "for a word over the free group",
