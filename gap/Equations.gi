@@ -78,9 +78,9 @@ end);
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local f, gens, const, consts, vars, copy, solutions;
-
+    local f, gens, const, consts, vars, copy, solutions, tree;
 	solutions := [];
+	tree := rec();
 
     # TODO: Make sure this gives is the correct generators all
     #       the time
@@ -94,17 +94,38 @@ function(w, u, n)
 	f := FreeGroup(String(gens[1]), String(gens[2]), 
 				   String(vars[1]), String(vars[2]));
 	consts := [f.1, f.1^-1, f.2, f.2^-1];
+	tree.children := consts;
 	w := MappedWord(w, vars, [f.3, f.4]);
 	u := MappedWord(u, gens, [f.1, f.2]);
 
 	for const in consts do
 		copy := MappedWord(w, [f.3], [const]);
 		if copy = u then
-			Add(solutions, const);
+			Add(solutions, [const, 0]);
 		fi;
+		solutions := (solutions, BuildTree(const, consts, tree, copy, u, f, solutions));
 	od;
 	return solutions;
 end);
+
+BuildTree := function(x, consts, node, copy, u, f, solutions)
+	local child, const, word, grandchild, c;
+	for child in node.children do
+		child.children := [];
+		for const in consts do
+			word := word * const;
+			Add(child.children, word);
+			c := MappedWord(copy, [f.4], [word]);
+			if c = u then
+				Add(solutions, [x, word]);
+			fi;
+		od;
+		for grandchild in child.children do
+			BuildTree(x, consts, grandchild, copy, u, f, solutions);
+		od;
+	od;
+	return solutions;
+end;
 
 InstallMethod(FreeGroupOfWord, "for a word over the free group",
               [IsWord], w -> FamilyObj(w)!.freeGroup);
