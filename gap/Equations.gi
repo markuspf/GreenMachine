@@ -78,7 +78,7 @@ end);
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local f, gens, const, consts, vars, copy, solutions, tree;
+    local f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4;
 	solutions := [];
 	tree := rec();
 
@@ -94,7 +94,15 @@ function(w, u, n)
 	f := FreeGroup(String(gens[1]), String(gens[2]), 
 				   String(vars[1]), String(vars[2]));
 	consts := [f.1, f.1^-1, f.2, f.2^-1];
-	tree.children := consts;
+	c1 := rec();
+	c1.value := consts[1];
+	c2 := rec();
+	c2.value := consts[2];
+	c3 := rec();
+	c3.value := consts[3];
+	c4 := rec();
+	c4.value := consts[4];
+	tree.children := [c1, c2, c3, c4];
 	w := MappedWord(w, vars, [f.3, f.4]);
 	u := MappedWord(u, gens, [f.1, f.2]);
 
@@ -108,13 +116,16 @@ function(w, u, n)
 	return solutions;
 end);
 
-BuildTree := function(x, consts, node, copy, u, f, solutions)
-	local child, const, word, grandchild, c;
+InstallGlobalFunction(BuildTree,
+function(x, consts, node, copy, u, f, solutions)
+	local child, const, word, grandchild, c, child_rec;
 	for child in node.children do
 		child.children := [];
 		for const in consts do
 			word := word * const;
-			Add(child.children, word);
+			child_rec := rec();
+			child_rec.value := word;
+			Add(child.children, child_rec);
 			c := MappedWord(copy, [f.4], [word]);
 			if c = u then
 				Add(solutions, [x, word]);
@@ -125,7 +136,7 @@ BuildTree := function(x, consts, node, copy, u, f, solutions)
 		od;
 	od;
 	return solutions;
-end;
+end);
 
 InstallMethod(FreeGroupOfWord, "for a word over the free group",
               [IsWord], w -> FamilyObj(w)!.freeGroup);
