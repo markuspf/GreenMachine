@@ -18,3 +18,4 @@ DeclareGlobalFunction("BuildTree");
 DeclareGlobalFunction("ShortSolutions");
 DeclareGlobalFunction("IsSolution");
 DeclareGlobalFunction("FreeGroupEquationSolve");
+DeclareGlobalFunction("BuildTree2");

@@ -111,18 +111,18 @@ function(w, u, n)
 		if copy = u then
 			Add(solutions, [const, 0]);
 		fi;
-		solutions := (solutions, BuildTree(const, consts, tree, copy, u, f, solutions));
+		solutions := (solutions, BuildTree2(const, consts, tree, copy, u, f, solutions, 0, n));
 	od;
 	return solutions;
 end);
 
-InstallGlobalFunction(BuildTree,
-function(x, consts, node, copy, u, f, solutions)
+InstallGlobalFunction(BuildTree2,
+function(x, consts, node, copy, u, f, solutions, n, limit)
 	local child, const, word, grandchild, c, child_rec;
 	for child in node.children do
 		child.children := [];
 		for const in consts do
-			word := word * const;
+			word := child.value * const;
 			child_rec := rec();
 			child_rec.value := word;
 			Add(child.children, child_rec);
@@ -132,8 +132,34 @@ function(x, consts, node, copy, u, f, solutions)
 			fi;
 		od;
 		for grandchild in child.children do
-			BuildTree(x, consts, grandchild, copy, u, f, solutions);
+			BuildTree2(x, consts, grandchild, copy, u, f, solutions, n, limit);
 		od;
+	od;
+	return solutions;
+end);
+
+
+InstallGlobalFunction(BuildTree,
+function(x, consts, node, copy, u, f, solutions, n, limit)
+	local child, const, word, grandchild, c, child_rec;
+	if n > limit then
+		return solutions;
+	fi;
+	for child in node.children do
+		child.children := [];
+		for const in consts do
+			word := child.value * const;
+			child_rec := rec();
+			child_rec.value := word;
+			Add(child.children, child_rec);
+			c := MappedWord(copy, [f.4], [word]);
+			if c = u then
+				Add(solutions, [x, word]);
+			fi;
+		od;
+	od;
+	for child in node.children do
+		BuildTree(x, consts, child, copy, u, f, solutions, n + 1, limit);
 	od;
 	return solutions;
 end);
