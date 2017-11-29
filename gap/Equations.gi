@@ -111,7 +111,7 @@ function(w, u, n)
 		if copy = u then
 			Add(solutions, [const, 0]);
 		fi;
-		solutions := (solutions, BuildTree2(const, consts, tree, copy, u, f, solutions, 0, n));
+		Append(solutions, BuildTree(const, consts, tree, copy, u, f, solutions, 0, n));
 	od;
 	return solutions;
 end);
