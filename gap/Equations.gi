@@ -96,13 +96,18 @@ function(w, u, n)
 	consts := [f.1, f.1^-1, f.2, f.2^-1];
 	c1 := rec();
 	c1.value := consts[1];
+	c1.parent := tree;
 	c2 := rec();
 	c2.value := consts[2];
+	c2.parent := tree;
 	c3 := rec();
 	c3.value := consts[3];
+	c3.parent := tree;
 	c4 := rec();
 	c4.value := consts[4];
+	c4.parent := tree;
 	tree.children := [c1, c2, c3, c4];
+	tree.value := f.1 * f.1^-1;
 	w := MappedWord(w, vars, [f.3, f.4]);
 	u := MappedWord(u, gens, [f.1, f.2]);
 
@@ -111,33 +116,10 @@ function(w, u, n)
 		if copy = u then
 			Add(solutions, [const, 0]);
 		fi;
-		Append(solutions, BuildTree(const, consts, tree, copy, u, f, solutions, 0, n));
+		solutions := BuildTree(const, consts, tree, copy, u, f, solutions, 0, n);
 	od;
 	return solutions;
 end);
-
-InstallGlobalFunction(BuildTree2,
-function(x, consts, node, copy, u, f, solutions, n, limit)
-	local child, const, word, grandchild, c, child_rec;
-	for child in node.children do
-		child.children := [];
-		for const in consts do
-			word := child.value * const;
-			child_rec := rec();
-			child_rec.value := word;
-			Add(child.children, child_rec);
-			c := MappedWord(copy, [f.4], [word]);
-			if c = u then
-				Add(solutions, [x, word]);
-			fi;
-		od;
-		for grandchild in child.children do
-			BuildTree2(x, consts, grandchild, copy, u, f, solutions, n, limit);
-		od;
-	od;
-	return solutions;
-end);
-
 
 InstallGlobalFunction(BuildTree,
 function(x, consts, node, copy, u, f, solutions, n, limit)
@@ -147,15 +129,19 @@ function(x, consts, node, copy, u, f, solutions, n, limit)
 	fi;
 	for child in node.children do
 		child.children := [];
+		c := MappedWord(copy, [f.4], [child.value]);
+		if c = u then
+			Add(solutions, [x, child.value]);
+		fi;
 		for const in consts do
 			word := child.value * const;
+			if word = child.parent.value then
+				continue;
+			fi;
 			child_rec := rec();
 			child_rec.value := word;
+			child_rec.parent := child;
 			Add(child.children, child_rec);
-			c := MappedWord(copy, [f.4], [word]);
-			if c = u then
-				Add(solutions, [x, word]);
-			fi;
 		od;
 	od;
 	for child in node.children do
