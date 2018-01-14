@@ -78,9 +78,10 @@ end);
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4;
+    local f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4, nodes;
 	solutions := [];
 	tree := rec();
+	nodes := [1];
 
     # TODO: Make sure this gives is the correct generators all
     #       the time
@@ -116,14 +117,17 @@ function(w, u, n)
 		if copy = u then
 			Add(solutions, [const, 0]);
 		fi;
-		solutions := BuildTree(const, consts, tree, copy, u, f, solutions, 0, n);
+		solutions := BuildTree(const, consts, tree, copy, u, f, solutions, 0, n, nodes);
 	od;
+	Print(nodes[1]);
+	Print("\n");
 	return solutions;
 end);
 
 InstallGlobalFunction(BuildTree,
-function(x, consts, node, copy, u, f, solutions, n, limit)
+function(x, consts, node, copy, u, f, solutions, n, limit, nodes)
 	local child, const, word, grandchild, c, child_rec;
+	nodes[1] := nodes[1] + 1;
 	if n > limit then
 		return solutions;
 	fi;
@@ -145,7 +149,7 @@ function(x, consts, node, copy, u, f, solutions, n, limit)
 		od;
 	od;
 	for child in node.children do
-		BuildTree(x, consts, child, copy, u, f, solutions, n + 1, limit);
+		BuildTree(x, consts, child, copy, u, f, solutions, n + 1, limit, nodes);
 	od;
 	return solutions;
 end);
