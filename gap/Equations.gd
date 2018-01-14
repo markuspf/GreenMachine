@@ -14,7 +14,8 @@ DeclareGlobalFunction("MoldovanskiiRewritingByGenerators");
 
 DeclareOperation("FreeGroupOfWord", [IsWord]);
 
-
+DeclareGlobalFunction("BuildTree");
 DeclareGlobalFunction("ShortSolutions");
 DeclareGlobalFunction("IsSolution");
 DeclareGlobalFunction("FreeGroupEquationSolve");
+DeclareGlobalFunction("BuildTree2");

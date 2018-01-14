@@ -72,44 +72,86 @@ end);
 
 # Find solutions to an equation w(x,y) = u(a,b)
 # up to length n by brute force
+# w(x, y) is a function of variables
+# u(a, b) is a function of constants
+# Trying to solve for x and y
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local res, i, k, words, totry, consts, vars;
+    local f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4, nodes;
+	solutions := [];
+	tree := rec();
+	nodes := [1];
 
     # TODO: Make sure this gives is the correct generators all
     #       the time
-    consts := Concatenation(List(GeneratorsOfMonoid(FreeGroupOfWord(u)), LetterRepAssocWord));
     vars := GeneratorsOfGroup(FreeGroupOfWord(w));
-    if Length(vars) <> 2 then
+	gens := GeneratorsOfGroup(FreeGroupOfWord(u));
+    
+	if Length(vars) <> 2 then
         Error("Can only handle precisely two variables currently");
     fi;
 
-    res := [];
+	f := FreeGroup(String(gens[1]), String(gens[2]), 
+				   String(vars[1]), String(vars[2]));
+	consts := [f.1, f.1^-1, f.2, f.2^-1];
+	c1 := rec();
+	c1.value := consts[1];
+	c1.parent := tree;
+	c2 := rec();
+	c2.value := consts[2];
+	c2.parent := tree;
+	c3 := rec();
+	c3.value := consts[3];
+	c3.parent := tree;
+	c4 := rec();
+	c4.value := consts[4];
+	c4.parent := tree;
+	tree.children := [c1, c2, c3, c4];
+	tree.value := f.1 * f.1^-1;
+	w := MappedWord(w, vars, [f.3, f.4]);
+	u := MappedWord(u, gens, [f.1, f.2]);
 
-    words := [];
-    totry := [ShallowCopy(consts)];
+	for const in consts do
+		copy := MappedWord(w, [f.3], [const]);
+		if copy = u then
+			Add(solutions, [const, 0]);
+		fi;
+		solutions := BuildTree(const, consts, tree, copy, u, f, solutions, 0, n, nodes);
+	od;
+	Print(nodes[1]);
+	Print("\n");
+	return solutions;
+end);
 
-    i := 1;
-    while i > 0 do
-        while (0 < i) and (i < n) do
-            if not IsEmpty(totry[i]) then
-                words[i] := Remove(totry[i]);
-                for k in [1..i] do
-                    if IsSolution(w, u, vars, [ Product(words{[1..k]}), Product(words{[k+1..i]})]) then
-                        Add(res, [words{[1..k]}, words{[k+1..i]}]);
-                    fi;
-                od;
-                totry[i+1] := ShallowCopy(consts);
-                i := i + 1;
-            fi;
-        od;
-        totry[i] := [];
-        while (i > 0) and IsEmpty(totry[i]) do
-            i := i - 1;
-        od;
-    od;
-    return res;
+InstallGlobalFunction(BuildTree,
+function(x, consts, node, copy, u, f, solutions, n, limit, nodes)
+	local child, const, word, grandchild, c, child_rec;
+	nodes[1] := nodes[1] + 1;
+	if n > limit then
+		return solutions;
+	fi;
+	for child in node.children do
+		child.children := [];
+		c := MappedWord(copy, [f.4], [child.value]);
+		if c = u then
+			Add(solutions, [x, child.value]);
+		fi;
+		for const in consts do
+			word := child.value * const;
+			if word = child.parent.value then
+				continue;
+			fi;
+			child_rec := rec();
+			child_rec.value := word;
+			child_rec.parent := child;
+			Add(child.children, child_rec);
+		od;
+	od;
+	for child in node.children do
+		BuildTree(x, consts, child, copy, u, f, solutions, n + 1, limit, nodes);
+	od;
+	return solutions;
 end);
 
 InstallMethod(FreeGroupOfWord, "for a word over the free group",
