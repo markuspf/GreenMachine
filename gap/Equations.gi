@@ -78,42 +78,29 @@ end);
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4, nodes;
+    local variables, constants, f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4, nodes;
 	solutions := [];
 	tree := rec();
 	nodes := [1];
 
     # TODO: Make sure this gives is the correct generators all
     #       the time
-    vars := GeneratorsOfGroup(FreeGroupOfWord(w));
-	gens := GeneratorsOfGroup(FreeGroupOfWord(u));
-    
-	if Length(vars) <> 2 then
-        Error("Can only handle precisely two variables currently");
-    fi;
+    variables := FreeGroupOfWord(w);
+	constants := FreeGroupOfWord(u);
 
-	f := FreeGroup(String(gens[1]), String(gens[2]), 
-				   String(vars[1]), String(vars[2]));
-	consts := [f.1, f.1^-1, f.2, f.2^-1];
-	c1 := rec();
-	c1.value := consts[1];
-	c1.parent := tree;
-	c2 := rec();
-	c2.value := consts[2];
-	c2.parent := tree;
-	c3 := rec();
-	c3.value := consts[3];
-	c3.parent := tree;
-	c4 := rec();
-	c4.value := consts[4];
-	c4.parent := tree;
-	tree.children := [c1, c2, c3, c4];
+	f := FreeGroup(Concatenation(List(GeneratorsOfGroup(constants), String),
+								 List(GeneratorsOfGroup(variables), String)));
+	gens := GeneratorsOfGroup(f){[1 .. Length(GeneratorsOfGroup(variables))]};
+	vars := GeneratorsOfGroup(f){[Length(GeneratorsOfGroup(variables)) + 1 ..
+								  Length(GeneratorsOfGroup(f))]};
+	consts := Concatenation(gens, List(gens, Inverse));
+	tree.children := List(consts, x -> rec(value := x, parent := tree));
 	tree.value := f.1 * f.1^-1;
-	w := MappedWord(w, vars, [f.3, f.4]);
-	u := MappedWord(u, gens, [f.1, f.2]);
+	w := MappedWord(w, GeneratorsOfGroup(variables), vars);
+	u := MappedWord(u, GeneratorsOfGroup(constants), consts);
 
 	for const in consts do
-		copy := MappedWord(w, [f.3], [const]);
+		copy := MappedWord(w, [vars[1]], [const]);
 		if copy = u then
 			Add(solutions, [const, 0]);
 		fi;
