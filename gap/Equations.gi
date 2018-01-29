@@ -70,6 +70,59 @@ function(w, u, xs, ixs)
     return MappedWord(w, xs, ixs) = u;
 end);
 
+InstallGlobalFunction(SubwordLength,
+function(word_string, i)
+	local subword, exp, next_exp, subcount, letter, j;
+	subcount := 0;
+	while i <= Length(word_string) do
+		next_exp := 0;
+		letter := word_string[i];
+		if IsAlphaChar(letter) then
+			if word_string[i+1] = '^' then
+				next_exp := Int([word_string[i+2]]);
+				i := i + 3;
+				while IsDigitChar(word_string[i]) do
+					next_exp := 10*next_exp;
+					next_exp := next_exp + Int([word_string[i]]);
+					i := i + 1;
+				od;
+				subcount := subcount + next_exp;
+			else
+				subcount := subcount + 1;
+				i := i + 1;
+			fi;
+		elif letter = ')' then
+			return subcount;
+		elif letter = '(' then
+			subword := SubwordLength(word_string, i + 1);
+			j := 0;
+			while word_string[i + j] <> ')' do
+				j := j + 1;
+			od;
+			i := i + j + 1;
+			exp := 1;
+			if i >= Length(word_string) then
+				return -1;
+			fi;
+			if word_string[i] = '^' then
+				exp := Int([word_string[i + 1]]);
+				i := i + 2;
+				while IsDigitChar(word_string[i]) do
+					exp := 10*exp;
+					exp := exp + Int([word_string[i]]);
+					i := i + 1;
+				od;
+			fi;
+			subcount := subcount + (exp * subword);
+			if i >= Length(word_string) then
+				return -1;
+			fi;
+		else
+			i := i + 1;
+		fi;
+	od;
+end);
+
 # Find solutions to an equation w(x,y) = u(a,b)
 # up to length n by brute force
 # w(x, y) is a function of variables
@@ -78,13 +131,11 @@ end);
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local variables, constants, f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4, nodes;
+    local variables, constants, f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4, nodes, word_string, letter, subcount, i, next_exp;
 	solutions := [];
 	tree := rec();
 	nodes := [1];
 
-    # TODO: Make sure this gives is the correct generators all
-    #       the time
     variables := FreeGroupOfWord(w);
 	constants := FreeGroupOfWord(u);
 
@@ -99,6 +150,18 @@ function(w, u, n)
 	w := MappedWord(w, GeneratorsOfGroup(variables), vars);
 	u := MappedWord(u, GeneratorsOfGroup(constants), consts);
 
+	if u = f.1 * f.1^-1 then
+		word_string := String(w);		
+		if IsDigitChar(word_string[Length(word_string)]) then
+			if word_string[1] = '(' then
+				subcount := SubwordLength(word_string, 2);
+				if subcount > 0 then
+					w := Subword(w, 1, subcount);
+				fi;
+			fi;
+		fi;
+	fi;
+
 	for const in consts do
 		copy := MappedWord(w, [vars[1]], [const]);
 		if copy = u then
@@ -106,8 +169,8 @@ function(w, u, n)
 		fi;
 		solutions := BuildTree(const, consts, tree, copy, u, f, solutions, 0, n, nodes);
 	od;
-	Print(nodes[1]);
-	Print("\n");
+	# Print(nodes[1]);
+	# Print("\n");
 	return solutions;
 end);
 
@@ -150,8 +213,6 @@ GreenTest := function(n)
     F := FreeGroup("x", "y");
     x := F.1; y := F.2;
 
-    U := FreeGroup("a", "b");
-    a := U.1; b := U.2;
 
     w := x * y * x;
     u := a^2 * b^2 * a^2;
