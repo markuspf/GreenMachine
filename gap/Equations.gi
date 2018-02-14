@@ -131,7 +131,7 @@ end);
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local variables, constants, f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4, nodes, word_string, letter, subcount, i, next_exp;
+    local variables, constants, f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4, nodes, word_string, letter, subcount, i, next_exp, start_consts;
 	solutions := [];
 	tree := rec();
 	nodes := [1];
@@ -145,7 +145,8 @@ function(w, u, n)
 	vars := GeneratorsOfGroup(f){[Length(GeneratorsOfGroup(variables)) + 1 ..
 								  Length(GeneratorsOfGroup(f))]};
 	consts := Concatenation(gens, List(gens, Inverse));
-	tree.children := List(consts, x -> rec(value := x, parent := tree));
+	start_consts := Concatenation(consts, [f.1*f.1^-1]);
+	tree.children := List(start_consts, x -> rec(value := x, parent := tree));
 	tree.value := f.1 * f.1^-1;
 	w := MappedWord(w, GeneratorsOfGroup(variables), vars);
 	u := MappedWord(u, GeneratorsOfGroup(constants), consts);
@@ -162,7 +163,7 @@ function(w, u, n)
 		fi;
 	fi;
 
-	for const in consts do
+	for const in start_consts do
 		copy := MappedWord(w, [vars[1]], [const]);
 		if copy = u then
 			Add(solutions, [const, 0]);
@@ -187,16 +188,18 @@ function(x, consts, node, copy, u, f, solutions, n, limit, nodes)
 		if c = u then
 			Add(solutions, [x, child.value]);
 		fi;
-		for const in consts do
-			word := child.value * const;
-			if word = child.parent.value then
-				continue;
-			fi;
-			child_rec := rec();
-			child_rec.value := word;
-			child_rec.parent := child;
-			Add(child.children, child_rec);
-		od;
+		if child.value <> (f.1*f.1^-1) then
+			for const in consts do
+				word := child.value * const;
+				if word = child.parent.value then
+					continue;
+				fi;
+				child_rec := rec();
+				child_rec.value := word;
+				child_rec.parent := child;
+				Add(child.children, child_rec);
+			od;
+		fi;
 	od;
 	for child in node.children do
 		BuildTree(x, consts, child, copy, u, f, solutions, n + 1, limit, nodes);
