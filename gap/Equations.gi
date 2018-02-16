@@ -131,7 +131,7 @@ end);
 
 InstallGlobalFunction(ShortSolutions,
 function(w, u, n)
-    local variables, constants, f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4, nodes, word_string, letter, subcount, i, next_exp, start_consts;
+    local variables, constants, f, gens, const, consts, vars, copy, solutions, tree, c1, c2, c3, c4, nodes, word_string, letter, subcount, i, next_exp, start_consts, exps;
 	solutions := [];
 	tree := rec();
 	nodes := [1];
@@ -160,6 +160,10 @@ function(w, u, n)
 					w := Subword(w, 1, subcount);
 				fi;
 			fi;
+		fi;
+		exps := ExponentSums(w);
+		if RemInt(exps[3], exps[4]) <> 0 and RemInt(exps[4], exps[3]) <> 0 then
+			return [[f.1 * f.1^-1, f.1 * f.1^-1]];
 		fi;
 	fi;
 
