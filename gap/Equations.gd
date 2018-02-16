@@ -11,9 +11,12 @@
 #! Returns the rewritten word and the automorphism
 DeclareGlobalFunction("MoldovanskiiRewritingByGenerators");
 
+
 DeclareOperation("FreeGroupOfWord", [IsWord]);
 
-
+DeclareGlobalFunction("BuildTree");
+DeclareGlobalFunction("SubwordLength");
 DeclareGlobalFunction("ShortSolutions");
 DeclareGlobalFunction("IsSolution");
 DeclareGlobalFunction("FreeGroupEquationSolve");
+DeclareGlobalFunction("BuildTree2");
